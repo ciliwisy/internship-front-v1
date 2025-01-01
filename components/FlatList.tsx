@@ -1,3 +1,24 @@
+/**
+ * @author zhouzhixin
+ * @date 2025-1-1 22:01
+ * 列表组件
+ * 
+ * @component
+ * @description 一个可定制的列表组件,支持不同的变体样式和颜色
+ * 
+ * @prop {React.ReactNode} children - 子元素内容
+ * @prop {TextStyle | TextStyle[]} style - 自定义样式
+ * @prop {'header' | 'body' | 'caption'} variant - 文本变体类型
+ *   - header: 标题文本,24号字体,加粗
+ *   - body: 正文文本,16号字体
+ *   - caption: 说明文本,12号字体,灰色
+ * @prop {string} color - 自定义文本颜色
+ */ 
+
+
+
+import { fp, hp, wp } from '@/constants/Adapt';
+import { GRAY, LIGHT, WHITE } from '@/constants/Colors';
 import React, { useCallback, useState } from 'react';
 import {
   FlatList,
@@ -9,8 +30,8 @@ import {
   ViewStyle,
   ListRenderItem,
 } from 'react-native';
-import { wp, hp, fp } from '../utils/adapt';
-import { TEXT_TERTIARY, BACKGROUND_WHITE, BACKGROUND_LIGHT } from '../constants/Colors';
+
+
 
 interface SFlatListProps<T> {
   data: T[];
@@ -28,7 +49,7 @@ interface SFlatListProps<T> {
   onEndReachedThreshold?: number;
 }
 
-export function SFlatList<T>({
+export function StalinFlatList<T>({
   data,
   renderItem,
   onRefresh,
@@ -40,7 +61,7 @@ export function SFlatList<T>({
   hasMore = true,
   style,
   contentContainerStyle,
-  refreshControlColors = [TEXT_TERTIARY],
+  refreshControlColors = [GRAY],
   onEndReachedThreshold = 0.2,
   ...restProps
 }: SFlatListProps<T>) {
@@ -77,7 +98,7 @@ export function SFlatList<T>({
     if (loadingMore) {
       return (
         <View style={styles.footer}>
-          <ActivityIndicator size="small" color={TEXT_TERTIARY} />
+          <ActivityIndicator size="small" color={GRAY} />
           <Text style={styles.footerText}>加载中...</Text>
         </View>
       );
@@ -103,7 +124,6 @@ export function SFlatList<T>({
       </View>
     );
   }, [EmptyComponent]);
-
   return (
     <FlatList
       data={data}
@@ -126,7 +146,7 @@ export function SFlatList<T>({
         ) : undefined
       }
       ListHeaderComponent={ListHeaderComponent}
-      ListFooterComponent={ListFooterComponent}
+      ListFooterComponent={ListFooterComponent??renderFooter()}
       ListEmptyComponent={renderEmpty}
       showsVerticalScrollIndicator={false}
       {...restProps}
@@ -137,7 +157,7 @@ export function SFlatList<T>({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: BACKGROUND_WHITE,
+    backgroundColor: WHITE,
   },
   emptyContentContainer: {
     flex: 1,
@@ -147,10 +167,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: BACKGROUND_LIGHT,
+    backgroundColor: LIGHT,
   },
   footerText: {
-    color: TEXT_TERTIARY,
+    color: GRAY,
     fontSize: fp(14),
     marginLeft: wp(8),
   },
@@ -158,13 +178,13 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: BACKGROUND_WHITE,
+    backgroundColor: WHITE,
     paddingVertical: hp(20),
   },
   emptyText: {
-    color: TEXT_TERTIARY,
+    color: GRAY,
     fontSize: fp(14),
   },
 });
 
-export default SFlatList; 
+export default StalinFlatList; 
