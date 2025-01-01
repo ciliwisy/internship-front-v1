@@ -6,6 +6,13 @@
 const tintColorLight = '#0a7ea4';
 const tintColorDark = '#fff';
 
+export const PRIMARY_BLUE = '#4A90E2';
+export const TEXT_PRIMARY = '#333333';
+export const TEXT_SECONDARY = '#666666';
+export const TEXT_TERTIARY = '#999999';
+export const BACKGROUND_WHITE = '#FFFFFF';
+export const BACKGROUND_LIGHT = '#F5F5F5';
+
 export const Colors = {
   light: {
     text: '#11181C',
