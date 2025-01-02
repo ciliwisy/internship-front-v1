@@ -1,11 +1,5 @@
 /// 岗位详情页面
 
-import { View, Text } from "react-native";
+import Orders from "@/app/(app)/orders";
 
-export default function Order() {
-    return (
-        <View>
-            <Text>岗位详情页面</Text>
-        </View>
-    );
-}
+export default Orders;

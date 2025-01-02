@@ -1,11 +1,5 @@
 /// 岗位详情页面
 
-import { View, Text } from "react-native";
+import User from "@/app/(app)/user";
 
-export default function User() {
-    return (
-        <View>
-            <Text>用户页面</Text>
-        </View>
-    );
-}
+export default User;
