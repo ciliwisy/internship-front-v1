@@ -17,10 +17,9 @@ import { useSession } from '@/ctx';
 
 
 
-
 export const StalinApolloProvider = ({ children }: PropsWithChildren) => {
 
-  const SERVER_URL = 'https://api.example.com/graphql';
+  const SERVER_URL = 'https://api.xqj.com/graphql';
 
   const { session } = useSession();
 

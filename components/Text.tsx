@@ -2,10 +2,10 @@
  * @author zhouzhixin
  * @date 2025-1-1 21:51
  * 文本组件
- * 
+ *
  * @component
  * @description 一个可定制的文本组件,支持不同的变体样式和颜色
- * 
+ *
  * @prop {React.ReactNode} children - 子元素内容
  * @prop {TextStyle | TextStyle[]} style - 自定义样式
  * @prop {'header' | 'body' | 'caption'} variant - 文本变体类型
@@ -15,31 +15,25 @@
  * @prop {string} color - 自定义文本颜色
  */
 
-
-
-import { fp } from '@/constants/Adapt';
-import { GRAY } from '@/constants/Colors';
-import React from 'react';
-import { Text as RNText, TextStyle, TextProps } from 'react-native';
+import { fp } from "@/constants/Adapt";
+import { GRAY } from "@/constants/Colors";
+import React from "react";
+import { Text as RNText, TextStyle, TextProps } from "react-native";
 
 interface StalinTextProps extends TextProps {
   children: React.ReactNode;
   style?: TextStyle | TextStyle[];
-  variant?: 'header' | 'body' | 'caption';
+  variant?: "header" | "body" | "caption";
   color?: string;
 }
-
-
-
-
 
 const defaultStyles = {
   header: {
     fontSize: fp(24),
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   body: {
-    fontSize: fp(16), 
+    fontSize: fp(16),
   },
   caption: {
     fontSize: fp(12),
@@ -47,27 +41,19 @@ const defaultStyles = {
   },
 };
 
-
-
 export const StainText: React.FC<StalinTextProps> = ({
   children,
   style,
-  variant = 'body',
+  variant = "body",
   color,
   ...props
 }) => {
   return (
     <RNText
-      style={[
-        defaultStyles[variant],
-        color && { color },
-        style,
-      ]}
+      style={[defaultStyles[variant], color && { color }, style]}
       {...props}
     >
       {children}
     </RNText>
   );
 };
-
-
