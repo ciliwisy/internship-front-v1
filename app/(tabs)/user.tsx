@@ -2,10 +2,10 @@
 
 import { View, Text } from "react-native";
 
-export default function Home() {
+export default function User() {
     return (
         <View>
-            <Text>岗位详情页面</Text>
+            <Text>用户页面</Text>
         </View>
     );
 }

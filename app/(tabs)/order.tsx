@@ -2,7 +2,7 @@
 
 import { View, Text } from "react-native";
 
-export default function Home() {
+export default function Order() {
     return (
         <View>
             <Text>岗位详情页面</Text>
