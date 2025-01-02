@@ -1,3 +1,7 @@
+
+
+
+
 import React from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { StainText } from '@/components/Text';
@@ -85,9 +89,9 @@ const exampleJob: JobPositionDTO = {
   status: "急聘"
 };
 
-export default function ExampleJobItem(){
-  return <JobItem {...exampleJob} />
-}
+export const ExampleJobItem = () => (
+  <JobItem {...exampleJob} />
+);
 
 
 // export default function PositionsScreen() {
