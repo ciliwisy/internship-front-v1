@@ -57,13 +57,13 @@ export const hp = (size: number): number => {
  */
 export const fp = (size: number): number => {
   if (Platform.OS === "ios") {
-    return size;
+    return size/DESIGN_WIDTH*screenWidth;
   }
   // Android 需要特殊处理
   if (pixelRatio >= 3) {
-    return size * 0.9;
+    return size * 0.9/DESIGN_WIDTH*screenWidth;
   }
-  return size;
+  return size/DESIGN_WIDTH*screenWidth;
 };
 
 /**

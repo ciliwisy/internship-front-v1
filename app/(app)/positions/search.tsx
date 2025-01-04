@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, TextInput, TouchableOpacity, Platform } from 'react-native';
-import { Text } from 'react-native';
+import { View, StyleSheet, TextInput, TouchableOpacity, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { GRAY } from '@/constants/Colors';
-import { wp, fp } from '@/constants/Adapt';
+import { BACKGROUND_GRAY, GRAY, GRAY_DARK, WHITE } from '@/constants/Colors';
+import { wp, fp, hp } from '@/constants/Adapt';
 import { useRouter } from 'expo-router';
+import { StalinText } from '@/components/Text';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const HISTORY_KEY = 'search_history';
 const MAX_HISTORY = 10;
@@ -79,81 +80,97 @@ export default function SearchScreen() {
       style={styles.tag}
       onPress={() => handleSearch(text)}
     >
-      <Text style={styles.tagText}>{text}</Text>
+      <StalinText variant='T9' style={styles.tagText}>{text}</StalinText>
     </TouchableOpacity>
   );
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={24} color="#000" />
-        </TouchableOpacity>
-        <View style={styles.searchBar}>
-          <TextInput
-            style={styles.input}
-            placeholder="搜索职位/公司"
-            value={keyword}
-            onChangeText={setKeyword}
-            onSubmitEditing={() => handleSearch(keyword)}
-            returnKeyType="search"
-            autoFocus
-          />
+    <SafeAreaView style={styles.container}> 
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()}>
+            <Ionicons name="arrow-back" size={wp(40)} color="#000" style={{marginStart: wp(0)}}/>
+          </TouchableOpacity>
+          <View style={styles.searchBarWrapper}>
+            <View style={styles.piSearchContainer}>
+              <View style={styles.searchIconContainer}>
+                <View style={{flex: 1, flexDirection: 'row', alignItems: 'center'}}>
+                  <Ionicons 
+                    name="search-outline" 
+                    size={hp(40)}
+                    color={GRAY}
+                    style={{marginStart: wp(16)}}
+                  />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="搜索职位/公司"
+                    value={keyword}
+                    onChangeText={setKeyword}
+                    onSubmitEditing={() => handleSearch(keyword)}
+                    returnKeyType="search"
+                    autoFocus
+                  />
+                </View>
+                <View style={{flex: 1, alignItems: 'flex-end'}}>
+                  <TouchableOpacity onPress={() => handleSearch(keyword)}>
+                    <Image source={require('@/assets/images/搜索.png')} style={{width: wp(92), height: hp(52)}}/>
+                  </TouchableOpacity>
+                </View>
+              </View> 
+            </View>
+          </View>
         </View>
-        <TouchableOpacity onPress={() => handleSearch(keyword)}>
-          <Text style={styles.searchButton}>搜索</Text>
-        </TouchableOpacity>
-      </View>
 
-      {history.length > 0 && (
+        {history.length > 0 && (
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <StalinText variant='T5' style={styles.sectionTitle}>历史搜索</StalinText>
+              <TouchableOpacity onPress={clearHistory}>
+                <Ionicons name="trash-outline" size={wp(40)} color={GRAY} />
+              </TouchableOpacity>
+            </View>
+            <View style={styles.tagContainer}>
+              {history.map(item => renderSearchTag(item))}
+
+            </View>
+          </View>
+        )}
+
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>历史搜索</Text>
-            <TouchableOpacity onPress={clearHistory}>
-              <Ionicons name="trash-outline" size={20} color={GRAY} />
-            </TouchableOpacity>
+            <StalinText variant='T5' style={styles.sectionTitle}>搜索发现</StalinText>
           </View>
           <View style={styles.tagContainer}>
-            {history.map(item => renderSearchTag(item))}
+            {HOT_SEARCHES.map(item => renderSearchTag(item))}
           </View>
         </View>
-      )}
-
-      <View style={styles.section}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>搜索发现</Text>
-        </View>
-        <View style={styles.tagContainer}>
-          {HOT_SEARCHES.map(item => renderSearchTag(item))}
-        </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: WHITE,
+    paddingHorizontal: wp(16),
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: wp(16),
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#eee',
+    padding: wp(0),
+    marginBottom: wp(50),
   },
   searchBar: {
     flex: 1,
     marginHorizontal: wp(12),
-    height: wp(36),
-    backgroundColor: '#f5f5f5',
-    borderRadius: wp(18),
+    height: wp(64),
+    backgroundColor: BACKGROUND_GRAY,
+    borderRadius: wp(25),
     paddingHorizontal: wp(12),
     justifyContent: 'center',
   },
   input: {
-    fontSize: fp(16),
     padding: 0,
   },
   searchButton: {
@@ -167,27 +184,55 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: wp(12),
+    marginBottom: wp(26),
   },
   sectionTitle: {
-    fontSize: fp(16),
     fontWeight: 'bold',
   },
   tagContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     marginTop: wp(8),
+    marginBottom: wp(50),
   },
   tag: {
-    backgroundColor: '#f5f5f5',
-    paddingHorizontal: wp(12),
-    paddingVertical: wp(6),
-    borderRadius: wp(16),
-    marginRight: wp(8),
-    marginBottom: wp(8),
+    backgroundColor: BACKGROUND_GRAY,
+    paddingHorizontal: wp(20),
+    paddingVertical: wp(10),
+    borderRadius: wp(10),
+    marginRight: wp(20),
+    marginBottom: wp(20),
   },
   tagText: {
-    fontSize: fp(14),
-    color: '#333',
+    color: GRAY_DARK,
+  },
+  
+  piSearchContainer: {
+    height: hp(64),
+    width: wp(620),
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginStart: wp(12),
+    paddingHorizontal: wp(16),
+    backgroundColor: WHITE,
+    borderRadius: wp(24),
+  },
+  searchContent: {
+    flex: 1,
+    marginStart: wp(8),
+    flexShrink: 1,
+  },
+  searchBarWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: hp(8),
+  },
+  searchIconContainer: {
+    height: hp(64),
+    borderRadius: wp(24),
+    backgroundColor: BACKGROUND_GRAY,
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
   },
 }); 
