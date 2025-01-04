@@ -16,30 +16,21 @@
  */
 
 import { fp } from "@/constants/Adapt";
-import { GRAY } from "@/constants/Colors";
 import React from "react";
 import { Text as RNText, TextStyle, TextProps } from "react-native";
+
+export type TextVariant = 
+  "T0" | "T1" | "T2" | "T3" | "T4" | "T5" 
+  | "T6" | "T7" | "T8" | "T9" | "T10";
 
 interface StalinTextProps extends TextProps {
   children: React.ReactNode;
   style?: TextStyle | TextStyle[];
-  variant?: "header" | "body" | "caption";
+  variant?: TextVariant;
   color?: string;
 }
 
-const defaultStyles = {
-  header: {
-    fontSize: fp(24),
-    fontWeight: "bold",
-  },
-  body: {
-    fontSize: fp(16),
-  },
-  caption: {
-    fontSize: fp(12),
-    color: GRAY,
-  },
-  
+export const defaultStyles = {
   T0: {
     fontSize: fp(62),///订单上方支付金额（大）
   },
@@ -74,17 +65,12 @@ const defaultStyles = {
     fontSize: fp(20),///我的优惠券优惠券备注
   },
 
-
-  bottomBar: {
-    fontSize: fp(18),
-  },
-
 };
 
-export const StainText: React.FC<StalinTextProps> = ({
+export const StalinText: React.FC<StalinTextProps> = ({
   children,
   style,
-  variant = "body",
+  variant = "T7",
   color,
   ...props
 }) => {

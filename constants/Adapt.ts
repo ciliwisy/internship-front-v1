@@ -22,8 +22,8 @@
 import { Dimensions, PixelRatio, Platform } from "react-native";
 
 // 设计稿尺寸
-const DESIGN_WIDTH = 375;
-const DESIGN_HEIGHT = 812;
+const DESIGN_WIDTH = 750;
+const DESIGN_HEIGHT = 1624;
 
 // 获取屏幕尺寸
 const screenWidth = Dimensions.get("window").width;
@@ -56,14 +56,13 @@ export const hp = (size: number): number => {
  * @returns number - 适配后的字体大小 (dp)
  */
 export const fp = (size: number): number => {
+  const scale = Math.min(screenWidth / DESIGN_WIDTH, screenHeight / DESIGN_HEIGHT);
+  const newSize = Math.round(size * scale);
   if (Platform.OS === "ios") {
-    return size;
+    return newSize;
+  } else {
+    return Math.round(newSize / pixelRatio);
   }
-  // Android 需要特殊处理
-  if (pixelRatio >= 3) {
-    return size * 0.9;
-  }
-  return size;
 };
 
 /**

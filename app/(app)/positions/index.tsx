@@ -1,15 +1,14 @@
 ////
-import { View, StyleSheet, Platform, TextInput, TouchableOpacity, ImageBackground } from 'react-native';
+import { View, StyleSheet, Platform, TextInput, TouchableOpacity, Image } from 'react-native';
 import { useQuery, gql } from '@apollo/client';
-import { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import StalinFlatList from '@/components/FlatList';
-import { Text } from 'react-native';
-import { GRAY } from '@/constants/Colors';
-import { wp, fp } from '@/constants/Adapt';
-import { Button } from 'react-native';
+import { wp, hp, fp } from '@/constants/Adapt';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { StalinText } from '@/components/Text';
+import { WHITE, GRAY, GRAY_LIGHT, LIGHT} from '@/constants/Colors';
 
 const ReadPosLst = gql`
   query ReadPosLst ($action: GraphQLReqAction!, $adcode: Int $mark: Timestamp, $keyword: String, $startTime: Timestamp, $endTime: Timestamp)  {
@@ -52,87 +51,17 @@ const ReadPosLst = gql`
 }
 `;
 
-export interface JobPositionDTO {
-    id: number;
-    title: string;           
-    organization: {          // 对应 institution.name
-        name: string;
-    };    
-    salaryMin: number;      
-    salaryMax: number;      
-    price: number;          // 底价
-    requirements: {
-        gender: number;     // 性别代码
-        education: number;  // 学历代码
-        ageMin?: number;   
-        ageMax?: number;
-        certs?: number[];  // 证书要求
-    };
-    address: string[];     // 工作地点
-    quota: number;         // 名额
-    sum: number;          // 已报名人数
-    status: string;       // 职位状态
-    endTime: number;      // 截止时间
-    postTime: number;     // 发布时间
-    desc?: string;        // 职位描述
-    types: number[];      // 职位类型
-    welfare: string[];    // 福利待遇
-    posterId: string;     // 发布者ID
-    institutionId: number; // 机构ID
-}
-
-interface QueryResponse {
-  readPosLst: JobPositionDTO[];
-}
-
-const exampleJob: JobPositionDTO = {
-  title: "高级前端工程师",
-  organization: "字节跳动",
-  salary: "25-35K",
-  basePrice: "2000",
-  requirements: {
-    gender: "男女不限",
-    education: "本科及以上",
-    ageRange: "25-35岁"
-  },
-  deadline: "2024-02-01",
-  status: "急聘"
-};
 
 
-// export const JobItem: React.FC<JobPositionDTO> = ({
-//   title,
-//   organization,
-//   salary,
-//   basePrice,
-//   requirements,
-//   deadline,
-//   status
-// }) => {
-//   return (
-//     <View style={styles.itemContainer}>
-//       <View style={styles.row}>
-//         <StainText variant="body">{title}</StainText>
-//         <StainText variant="body" color={BLUE_LINK}>{salary}</StainText>
-//       </View>
-
-//       <View style={styles.row}>
-//         <StainText variant="body" color={GRAY}>{organization}</StainText>
-//         <StainText variant="body" color={BLUE_LINK}>底价 {basePrice}</StainText>
-//       </View>
-
-//       <View style={styles.requirementsRow}>
-//         <StainText variant="caption" color={GRAY}>{requirements.gender || '男女不限'}</StainText>
-//         <StainText variant="caption" color={GRAY}>{requirements.education}</StainText>
-//         <StainText variant="caption" color={GRAY}>{requirements.ageRange}</StainText>
-//         {status && <StainText variant="caption" color={GRAY}>{status}</StainText>}
-//       </View>
-//     </View>
-//   );
-// };
 
 
-export default function ExampleJobItem(){
+/**
+ * @author mabohao
+ * @time 2025-01-01 13:39
+ * @description 首页上面的那个searchbar
+*/
+
+function PISearchBar() {
 
   const [mark, setMark] = useState<number | null>(null);
   const [hasMore, setHasMore] = useState(true);
@@ -146,7 +75,7 @@ export default function ExampleJobItem(){
   useEffect(() => {
     if (params.keyword) {
       setKeyword(params.keyword);
-      handleRefresh(params.keyword);
+      // handleRefresh(params.keyword);
     }
   }, [params.keyword]);
 
@@ -168,342 +97,174 @@ export default function ExampleJobItem(){
     }
   });
 
-  const handleRefresh = async (searchKeyword?: string) => {
-    try {
-      setError(null);
-      setHasMore(true);
-      const result = await refetch({ 
-        action: "REFRESH", 
-        mark: null,
-        keyword: searchKeyword || keyword || undefined 
-      });
-      if (result.data?.readPosLst) {
-        setPositions(result.data.readPosLst);
-        if (result.data.readPosLst.length > 0) {
-          const lastItem = result.data.readPosLst[result.data.readPosLst.length - 1];
-          setMark(lastItem.postTime);
-        }
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : '刷新失败');
-    }
-  };
-
-
-  const handleLoadMore = async () => {
-    if (!hasMore || !mark) return;
-    
-    try {
-      const result = await refetch({ 
-        action: "FILL", 
-        mark,
-        keyword: keyword || undefined 
-      });
-      if (!result.data?.readPosLst?.length) {
-        setHasMore(false);
-        return;
-      }
-
-      setPositions(prev => [...prev, ...result.data.readPosLst]);
-      const lastItem = result.data.readPosLst[result.data.readPosLst.length - 1];
-      setMark(lastItem.postTime);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : '加载更多失败');
-    }
-  };
-
-  const handleSearch = useCallback(() => {
-    handleRefresh();
-  }, [keyword]);
-
-  const renderItem = ({ item }: { item: JobPositionDTO }) => (
-    <View style={styles.itemContainer}>
-      <View style={styles.header}>
-        <View style={styles.titleContainer}>
-          <Text style={styles.title}>{item.title || '无标题'}</Text>
-          <Text style={styles.salary}>
-            ¥{(item.salaryMin || 0)/1000}k-{(item.salaryMax || 0)/1000}k
-          </Text>
+  return (
+    <View>
+      <View style={styles.searchBarWrapper}>
+        <TouchableOpacity onPress={() => router.push('/positions/search')}>
+          <View style={styles.piSearchContainer}>
+            <View style={styles.searchIconContainer}>
+              <Ionicons name="search-outline" size={wp(40)} color={GRAY}/>
+              <StalinText variant="T8" color={GRAY_LIGHT} style={styles.searchContent}>
+                搜索职位/公司
+              </StalinText>
+            </View>
+          </View>
+        </TouchableOpacity>
+        <View style={styles.chatIconContainer}>
+          <Ionicons name="chatbox-outline" size={wp(40)} color={GRAY}/>
         </View>
-        <Text style={styles.institutionName}>
-          {item.institution?.name || '未知机构'}
-        </Text>
       </View>
       
-      <View style={styles.infoContainer}>
-        <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>地址：</Text>
-          <Text style={styles.infoValue}>
-            {item.address?.length ? item.address.join(' ') : '地址未知'}
-          </Text>
-        </View>
-        
-        {(item.ageMin || item.ageMax) && (
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>年龄：</Text>
-            <Text style={styles.infoValue}>
-              {item.ageMin ? `${item.ageMin}岁` : '不限'} - 
-              {item.ageMax ? `${item.ageMax}岁` : '不限'}
-            </Text>
-          </View>
-        )}
-        
-        {item.edu !== undefined && item.edu !== null && (
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>学历：</Text>
-            <Text style={styles.infoValue}>
-              {['不限', '小学', '初中', '高中', '大专', '本科', '硕士', '博士'][item.edu] || '未知'}
-            </Text>
-          </View>
-        )}
-        
-        <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>名额：</Text>
-          <Text style={styles.infoValue}>{item.quota || 0}人</Text>
-        </View>
-      </View>
-
-      {item.welfare?.length > 0 && (
-        <View style={styles.welfareContainer}>
-          {item.welfare.map((benefit, index) => (
-            <View key={index} style={styles.welfareTag}>
-              <Text style={styles.welfareText}>{benefit}</Text>
+      <View style={styles.recommendContainer}>
+        <StalinText variant='T7' style={styles.recommendText}>
+          推荐
+        </StalinText>
+        <View>
+          <View style={styles.filterContainer}>
+            <View style={styles.filterItem}>
+              <StalinText variant='T9'>
+                长春 
+              </StalinText>
+              <Image 
+                source={require('@/assets/images/展开选项.png')} 
+                style={{ width: wp(8), height: wp(8), marginStart: wp(12), marginTop: hp(15)}}
+              />
             </View>
-          ))}
+            <View style={styles.filterItem}>
+              <StalinText variant='T9'>
+                筛选
+              </StalinText>
+              <Image 
+                source={require('@/assets/images/展开选项.png')} 
+                style={{ width: wp(8), height: wp(8), marginStart: wp(12), marginTop: hp(15)}}
+              />
+            </View>
+          </View>
         </View>
-      )}
-
-      <View style={styles.footer}>
-        <Text style={styles.time}>
-          发布时间：{item.postTime ? new Date(item.postTime).toLocaleDateString() : '未知'}
-        </Text>
       </View>
     </View>
-  );
-
-  const ErrorComponent = useCallback(() => (
-    <View style={styles.errorContainer}>
-      <Text style={styles.errorText}>{error}</Text>
-      <Button 
-        title="重试" 
-        onPress={handleRefresh}
-      />
-    </View>
-  ), [error]);
-
-
-
-  return (
-    <ImageBackground 
-      source={require('@/assets/images/bg1.png')}
-      style={styles.backgroundImage}
-    >
-      <SafeAreaView style={styles.container} edges={['top']}>
-        <View style={styles.searchContainer}>
-          <TouchableOpacity 
-            style={styles.searchInputContainer}
-            onPress={() => router.push('/positions/search')}
-          >
-            <Ionicons name="search-outline" size={20} color={GRAY} style={styles.searchIcon} />
-            <Text style={[styles.searchInput, { color: GRAY }]}>
-              {keyword || '搜索职位/公司'}
-            </Text>
-          </TouchableOpacity>
-          
-        </View>
-        
-        {Platform.OS === 'web' && (
-          <View style={styles.webRefreshContainer}>
-            <Button 
-              title="刷新数据" 
-              onPress={() => handleRefresh()}
-            />
-          </View>
-        )}
-        <StalinFlatList
-          data={positions}
-          renderItem={renderItem}
-          onRefresh={Platform.OS !== 'web' ? () => handleRefresh() : undefined}
-          onLoadMore={handleLoadMore}
-          hasMore={hasMore}
-          contentContainerStyle={styles.listContainer}
-          EmptyComponent={error ? <ErrorComponent /> : undefined}
-        />
-      </SafeAreaView>
-    </ImageBackground>
   );
 }
 
+
+export interface JobPositionDTO {
+  id: number;
+  title: string;
+  organization: {          // 对应 institution.name
+    name: string;
+  };
+  salaryMin: number;
+  salaryMax: number;
+  price: number;          // 底价
+  requirements: {
+    gender: number;     // 性别代码
+    education: number;  // 学历代码
+    ageMin?: number;
+    ageMax?: number;
+    certs?: number[];  // 证书要求
+  };
+  address: string[];     // 工作地点
+  quota: number;         // 名额
+  sum: number;          // 已报名人数
+  status: string;       // 职位状态
+  endTime: number;      // 截止时间
+  postTime: number;     // 发布时间
+  desc?: string;        // 职位描述
+  types: number[];      // 职位类型
+  welfare: string[];    // 福利待遇
+  posterId: string;     // 发布者ID
+  institutionId: number; // 机构ID
+}
+
+interface QueryResponse {
+  readPosLst: JobPositionDTO[];
+}
+
+// const exampleJob: JobPositionDTO = {
+//   title: "高级前端工程师",
+//   organization: "字节跳动",
+//   salary: "25-35K",
+//   basePrice: "2000",
+//   requirements: {
+//     gender: "男女不限",
+//     education: "本科及以上",
+//     ageRange: "25-35岁"
+//   },
+//   deadline: "2024-02-01",
+//   status: "急聘"
+// };
+
+
+export default function Temp() {
+  return <SafeAreaView>
+    <PISearchBar />
+  </SafeAreaView>
+}
+
 const styles = StyleSheet.create({
-  backgroundImage: {
-    flex: 1,
-    width: '100%',
-  },
-  container: {
-    flex: 1,
-  },
-  searchContainer: {
-    paddingHorizontal: wp(16),
-    paddingVertical: wp(8),
-    backgroundColor: 'transparent',
-  },
-  searchInputContainer: {
+  piSearchContainer: {
+    width: wp(620),
+    height: wp(64),
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#ffffff',
-    borderRadius: wp(8),
-    paddingHorizontal: wp(12),
-    height: wp(40),
+    marginTop: hp(12),
+    marginStart: wp(28),
+    paddingStart: wp(14),
+    backgroundColor: WHITE,
+    borderRadius: wp(20),
   },
-  searchIcon: {
-    marginRight: wp(8),
+  searchContent: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
   },
-  searchInput: {
-    flex: 1,
-    fontSize: fp(16),
-    color: '#333',
-    padding: 0,
+  locationText: {
+    backgroundColor: WHITE, 
+    marginEnd: wp(70), 
+    width: wp(94), 
+    height: hp(50),
+    borderRadius: wp(20),
+    paddingStart: wp(16),
+    alignContent: 'center',
   },
-  listContainer: {
-    padding: wp(16),
-    backgroundColor: 'transparent',
+  searchBarWrapper: {
+    flexDirection: 'row',
+    alignContent: 'center'
   },
-  itemContainer: {
-    padding: wp(16),
-    backgroundColor: 'rgba(255, 255, 255, 0)',
-    borderRadius: wp(8),
-    marginBottom: wp(12),
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+  searchIconContainer: {
+    backgroundColor: WHITE,
+    flexDirection: 'row',
+    alignItems: 'center'
   },
-  header: {
+  chatIconContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginStart: wp(30),
+    marginTop: hp(12)
+  },
+  recommendContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: wp(8),
+    marginTop: hp(38)
   },
-  institutionName: {
-    fontSize: fp(16),
-    fontWeight: 'bold',
+  recommendText: {
+    marginTop: hp(38),
+    marginStart: wp(36),
+    marginEnd: wp(328)
   },
-  time: {
-    fontSize: fp(12),
-    color: GRAY,
-  },
-  content: {
+  filterContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  id: {
-    fontSize: fp(14),
-    color: GRAY,
-  },
-  status: {
-    fontSize: fp(14),
-    color: GRAY,
-  },
-  webRefreshContainer: {
-    padding: wp(16),
-    backgroundColor: 'rgba(255, 255, 255, 0)',
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
-    padding: wp(16),
+    marginTop: hp(43)
   },
-  errorText: {
-    fontSize: fp(14),
-    color: 'red',
-    marginBottom: wp(16),
-    textAlign: 'center',
-  },
-  titleContainer: {
+  filterItem: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: wp(4),
-  },
-  title: {
-    fontSize: fp(18),
-    fontWeight: 'bold',
-  },
-  salary: {
-    fontSize: fp(16),
-    color: '#ff4d4f',
-    fontWeight: 'bold',
-  },
-  infoContainer: {
-    marginVertical: wp(12),
-  },
-  infoRow: {
-    flexDirection: 'row',
-    marginBottom: wp(4),
-  },
-  infoLabel: {
-    fontSize: fp(14),
-    color: GRAY,
-    width: wp(60),
-  },
-  infoValue: {
-    fontSize: fp(14),
-    flex: 1,
-  },
-  welfareContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginBottom: wp(12),
-  },
-  welfareTag: {
-    backgroundColor: '#f5f5f5',
-    paddingHorizontal: wp(8),
-    paddingVertical: wp(4),
-    borderRadius: wp(4),
-    marginRight: wp(8),
-    marginBottom: wp(8),
-  },
-  welfareText: {
-    fontSize: fp(12),
-    color: GRAY,
-  },
-  footer: {
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: '#eee',
-    paddingTop: wp(12),
-  },
+    backgroundColor: WHITE,///背景颜色重复 先用WHITE测试 改成LIGHT
+    borderRadius: wp(20),
+    width: wp(94),
+    height: hp(50),
+    marginEnd: wp(46),
+    paddingStart: wp(16)
+  }
 });
-
-
-
-// export default function PositionsScreen() {
-//   return (
-//     <ScrollView style={{ backgroundColor: BACKGROUND_GRAY }}>
-//       {/* Add JobItem components here with actual data */}
-//     </ScrollView>
-//   );
-// }
-
-
-// const styles = StyleSheet.create({
-//   itemContainer: {
-//     backgroundColor: WHITE,
-//     padding: wp(20),
-//     marginBottom: wp(10),
-//   },
-//   row: {
-//     flexDirection: 'row',
-//     justifyContent: 'space-between',
-//     alignItems: 'center',
-//     marginBottom: wp(10),
-//   },
-//   requirementsRow: {
-//     flexDirection: 'row',
-//     gap: wp(15),
-//   },
-// });
