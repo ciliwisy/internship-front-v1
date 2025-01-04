@@ -7,8 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { StalinText } from '@/components/Text';
-import { WHITE, GRAY, GRAY_LIGHT, LIGHT} from '@/constants/Colors';
-import { PositionItem } from './item';
+import { WHITE, GRAY, GRAY_LIGHT, LIGHT, GRAY_LIGHTER, PRIMARY_BLUE, BACKGROUND_GRAY} from '@/constants/Colors';
 import StalinFlatList from '@/components/FlatList';
 
 const ReadPosLst = gql`
@@ -65,6 +64,7 @@ const ReadPosLst = gql`
 // SearchBar 组件
 const SearchBar = () => {
   const router = useRouter();
+
 
   return (
     <View style={styles.searchBarWrapper}>
@@ -136,6 +136,50 @@ const RecommendSection = () => {
   );
 };
 
+//item组件
+const PositionItem: React.FC<JobPositionDTO & {
+  onPress?: () => void;
+}> = ({
+  title,
+  organization,
+  salary,
+  basePrice,
+  requirements,
+  deadline,
+  status,
+  onPress,
+}) => {
+  return (
+    <TouchableOpacity style={styles.container2} onPress={onPress}>
+      <View style={styles.header}>
+        <StalinText variant="T5" style={styles.title}>{title}</StalinText>
+        <StalinText variant="T6" style={styles.salary}>{salary}元/月</StalinText>
+      </View>
+      <View style={styles.infoContainer}>
+        <StalinText variant="T8" style={styles.company}>{organization}</StalinText>
+        <View style={styles.basePriceContainer}>
+          <StalinText variant="T8" style={styles.basePrice}>底价</StalinText>
+          <StalinText variant="T6" style={styles.basePriceNumber}>{basePrice}万</StalinText>
+        </View>
+      </View>
+      <View style={styles.footer}>
+        <View style={styles.tagContainer}>
+          <View style={styles.tag}>
+            <StalinText variant="T9" style={styles.tagText}>{requirements.gender}</StalinText>
+          </View>
+          <View style={styles.tag}>
+            <StalinText variant="T9" style={styles.tagText}>{requirements.education}</StalinText>
+          </View>
+          <View style={styles.tag}>
+            <StalinText variant="T9" style={styles.tagText}>{requirements.ageRange}</StalinText>
+          </View>
+        </View>
+        <StalinText variant="T9" style={styles.time}>{deadline}</StalinText>
+      </View>
+    </TouchableOpacity>
+  );
+};
+
 // 主组件
 function PISearchBar() {
   const [mark, setMark] = useState<number | null>(null);
@@ -155,6 +199,7 @@ function PISearchBar() {
       if (data?.readPosLst) {
         if (data.readPosLst.length > 0) {
           const lastItem = data.readPosLst[data.readPosLst.length - 1];
+          // setMark(lastItem.postTime);
           // setMark(lastItem.postTime);
         }
       }
@@ -182,7 +227,17 @@ export interface JobPositionDTO {
   organization: string;    // 机构名称
   salary: string;         // 薪资范围
   basePrice: string;      // 底价
+  title: string;           // 职位名称
+  organization: string;    // 机构名称
+  salary: string;         // 薪资范围
+  basePrice: string;      // 底价
   requirements: {
+    gender?: '男' | '女' | '男女不限';
+    education: string;
+    ageRange: string;    // 例如: "18-35岁"
+  };
+  deadline?: string;     // 截止时间
+  status?: string;       // 例如: "名额候补中"
     gender?: '男' | '女' | '男女不限';
     education: string;
     ageRange: string;    // 例如: "18-35岁"
@@ -236,8 +291,59 @@ const exampleJobs: JobPositionDTO[] = [
     status: "在招"
   }
 ];
+const exampleJobs: JobPositionDTO[] = [
+  {
+    title: "高级前端工程师",
+    organization: "字节跳动",
+    salary: "25-35K",
+    basePrice: "2000",
+    requirements: {
+      gender: "男女不限",
+      education: "本科及以上",
+      ageRange: "25-35岁"
+    },
+    deadline: "2024-02-01",
+    status: "急聘"
+  },
+  {
+    title: "资深后端工程师",
+    organization: "阿里巴巴",
+    salary: "30-45K",
+    basePrice: "2500",
+    requirements: {
+      gender: "男女不限",
+      education: "本科及以上",
+      ageRange: "25-40岁"
+    },
+    deadline: "2024-02-15",
+    status: "在招"
+  },
+  {
+    title: "产品经理",
+    organization: "腾讯",
+    salary: "20-35K",
+    basePrice: "1800",
+    requirements: {
+      gender: "男女不限",
+      education: "本科及以上",
+      ageRange: "24-35岁"
+    },
+    deadline: "2024-02-10",
+    status: "在招"
+  }
+];
 
 export default function Temp() {
+  return (
+    <View style={{ flex: 1 }}>
+      <PISearchBar />
+      <StalinFlatList
+        style={{ flex: 1 }}
+        data={exampleJobs}
+        renderItem={({ item }) => <PositionItem {...item} />}
+      />
+    </View>
+  );
   return (
     <View style={{ flex: 1 }}>
       <PISearchBar />
@@ -269,7 +375,6 @@ const styles = StyleSheet.create({
   searchContent: {
     flex: 1,
     marginStart: wp(8),
-    fontSize: fp(14),
     flexShrink: 1,
   },
   searchBarWrapper: {
@@ -299,7 +404,6 @@ const styles = StyleSheet.create({
   },
   recommendText: {
     fontWeight: '600',
-    fontSize: fp(16),
   },
   filterWrapper: {
     flex: 1,
@@ -320,7 +424,6 @@ const styles = StyleSheet.create({
     marginStart: wp(12),
   },
   filterText: {
-    fontSize: fp(12),
   },
   filterIcon: {
     width: wp(8),
@@ -338,6 +441,82 @@ const styles = StyleSheet.create({
   container: {
     paddingTop: hp(8),
     paddingHorizontal: wp(28),
+  },
+  container2: {
+    width: wp(718),
+    height: wp(210),
+    padding: wp(30),
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    marginHorizontal: wp(16),
+    marginVertical: wp(8),
+    borderRadius: wp(16),
+    backgroundColor: WHITE,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  title: {
+    fontWeight: '500',
+  },
+  salary: {
+    fontWeight: '600',
+    color: PRIMARY_BLUE,
+  },
+  infoContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: wp(8),
+  },
+  tagContainer: {
+    flexDirection: 'row',
+    gap: wp(8),
+  },
+  tag: {
+    paddingHorizontal: wp(8),
+    paddingVertical: wp(4),
+    borderRadius: wp(8),
+    backgroundColor: BACKGROUND_GRAY,
+  },
+  tagText: {
+    color: GRAY,
+  },
+  basePrice: {
+    justifyContent: 'flex-end',
+  },
+  basePriceNumber: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    color: PRIMARY_BLUE,
+    fontWeight: '600',
+  },
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  company: {
+    color: GRAY,
+    flex: 1,
+  },
+  time: {
+    color: GRAY_LIGHTER,
+  },
+  basePriceContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: wp(4),
   },
 });
 

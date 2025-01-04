@@ -35,6 +35,7 @@ export default function RootLayout() {
         <StalinApolloProvider>
           <Stack>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="(app)/positions/search" options={{ headerShown: false }} />
             <Stack.Screen name="+not-found" />
           </Stack>
         </StalinApolloProvider>
