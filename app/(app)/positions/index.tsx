@@ -1,5 +1,5 @@
 ////
-import { View, StyleSheet, Platform, TextInput, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, Platform, TextInput, TouchableOpacity, ImageBackground } from 'react-native';
 import { useQuery, gql } from '@apollo/client';
 import { useState, useCallback, useEffect } from 'react';
 import StalinFlatList from '@/components/FlatList';
@@ -294,54 +294,63 @@ export default function ExampleJobItem(){
 
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <View style={styles.searchContainer}>
-        <TouchableOpacity 
-          style={styles.searchInputContainer}
-          onPress={() => router.push('/positions/search')}
-        >
-          <Ionicons name="search-outline" size={20} color={GRAY} style={styles.searchIcon} />
-          <Text style={[styles.searchInput, { color: GRAY }]}>
-            {keyword || '搜索职位/公司'}
-          </Text>
-        </TouchableOpacity>
-      </View>
-      
-      {Platform.OS === 'web' && (
-        <View style={styles.webRefreshContainer}>
-          <Button 
-            title="刷新数据" 
-            onPress={handleRefresh}
-          />
+    <ImageBackground 
+      source={require('@/assets/images/bg1.png')}
+      style={styles.backgroundImage}
+    >
+      <SafeAreaView style={styles.container} edges={['top']}>
+        <View style={styles.searchContainer}>
+          <TouchableOpacity 
+            style={styles.searchInputContainer}
+            onPress={() => router.push('/positions/search')}
+          >
+            <Ionicons name="search-outline" size={20} color={GRAY} style={styles.searchIcon} />
+            <Text style={[styles.searchInput, { color: GRAY }]}>
+              {keyword || '搜索职位/公司'}
+            </Text>
+          </TouchableOpacity>
+          
         </View>
-      )}
-      <StalinFlatList
-        data={positions}
-        renderItem={renderItem}
-        onRefresh={Platform.OS !== 'web' ? handleRefresh : undefined}
-        onLoadMore={handleLoadMore}
-        hasMore={hasMore}
-        contentContainerStyle={styles.listContainer}
-        EmptyComponent={error ? <ErrorComponent /> : undefined}
-      />
-    </SafeAreaView>
+        
+        {Platform.OS === 'web' && (
+          <View style={styles.webRefreshContainer}>
+            <Button 
+              title="刷新数据" 
+              onPress={() => handleRefresh()}
+            />
+          </View>
+        )}
+        <StalinFlatList
+          data={positions}
+          renderItem={renderItem}
+          onRefresh={Platform.OS !== 'web' ? () => handleRefresh() : undefined}
+          onLoadMore={handleLoadMore}
+          hasMore={hasMore}
+          contentContainerStyle={styles.listContainer}
+          EmptyComponent={error ? <ErrorComponent /> : undefined}
+        />
+      </SafeAreaView>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
+  backgroundImage: {
+    flex: 1,
+    width: '100%',
+  },
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
   searchContainer: {
     paddingHorizontal: wp(16),
     paddingVertical: wp(8),
-    backgroundColor: '#fff',
+    backgroundColor: 'transparent',
   },
   searchInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#ffffff',
     borderRadius: wp(8),
     paddingHorizontal: wp(12),
     height: wp(40),
@@ -357,10 +366,11 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     padding: wp(16),
+    backgroundColor: 'transparent',
   },
   itemContainer: {
     padding: wp(16),
-    backgroundColor: '#fff',
+    backgroundColor: 'rgba(255, 255, 255, 0)',
     borderRadius: wp(8),
     marginBottom: wp(12),
     shadowColor: '#000',
@@ -400,7 +410,7 @@ const styles = StyleSheet.create({
   },
   webRefreshContainer: {
     padding: wp(16),
-    backgroundColor: '#fff',
+    backgroundColor: 'rgba(255, 255, 255, 0)',
   },
   errorContainer: {
     flex: 1,
