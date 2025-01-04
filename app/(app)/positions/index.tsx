@@ -8,6 +8,8 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { StalinText } from '@/components/Text';
 import { WHITE, GRAY, GRAY_LIGHT, LIGHT} from '@/constants/Colors';
+import { PositionItem } from './item';
+import StalinFlatList from '@/components/FlatList';
 
 const ReadPosLst = gql`
   query ReadPosLst ($action: GraphQLReqAction!, $adcode: Int $mark: Timestamp, $keyword: String, $startTime: Timestamp, $endTime: Timestamp)  {
@@ -64,49 +66,6 @@ const ReadPosLst = gql`
 const SearchBar = () => {
   const router = useRouter();
 
-  const styles = StyleSheet.create({
-    searchButton: {
-      flex: 1,
-    },
-  
-    piSearchContainer: {
-      height: hp(64),
-      width: wp(600),
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginStart: wp(24),
-      paddingHorizontal: wp(16),
-      backgroundColor: WHITE,
-      borderRadius: wp(24),
-    },
-  
-    searchContent: {
-      flex: 1,
-      marginStart: wp(8),
-      fontSize: fp(14),
-      flexShrink: 1,
-    },
-  
-    searchBarWrapper: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingVertical: hp(8),
-    },
-  
-    searchIconContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      flex: 1,
-    },
-  
-    chatIconContainer: {
-      padding: wp(12),
-      marginStart: wp(30),
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-  });
-  
   return (
     <View style={styles.searchBarWrapper}>
       <TouchableOpacity 
@@ -146,53 +105,6 @@ const SearchBar = () => {
 
 // RecommendSection 组件
 const RecommendSection = () => {
-
-  const styles = StyleSheet.create({
-    recommendContainer: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginTop: hp(38),
-      paddingHorizontal: wp(24),
-    },
-  
-    recommendText: {
-      fontWeight: '600',
-      fontSize: fp(16),
-    },
-  
-    filterWrapper: {
-      flex: 1,
-      alignItems: 'flex-end',
-    },
-  
-    filterContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-    },
-  
-    filterItem: {
-      width:wp(94),
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: LIGHT,
-      borderRadius: wp(10),
-      paddingVertical: hp(8),
-      paddingHorizontal: wp(12),
-      marginStart: wp(12),
-    },
-  
-    filterText: {
-      fontSize: fp(12),
-    },
-  
-    filterIcon: {
-      width: wp(8),
-      height: wp(8),
-      marginStart: wp(8),
-    },
-  });
-
   return (
     <View style={styles.recommendContainer}>
       <StalinText variant='T7' style={styles.recommendText}>
@@ -243,29 +155,11 @@ function PISearchBar() {
       if (data?.readPosLst) {
         if (data.readPosLst.length > 0) {
           const lastItem = data.readPosLst[data.readPosLst.length - 1];
-          setMark(lastItem.postTime);
+          // setMark(lastItem.postTime);
         }
       }
     }
   });
-
-  const styles = StyleSheet.create({
-    backgroundImage: {
-      flex: 1,
-      width: wp(750),
-    },
-    
-    safeArea: {
-      flex: 1,
-    },
-  
-    container: {
-      flex: 1,
-      paddingTop: hp(8),
-      paddingHorizontal: wp(28),
-    },  
-  });
-
 
   return (
     <ImageBackground 
@@ -284,54 +178,166 @@ function PISearchBar() {
 
 
 export interface JobPositionDTO {
-  id: number;
-  title: string;
-  organization: {          // 对应 institution.name
-    name: string;
-  };
-  salaryMin: number;
-  salaryMax: number;
-  price: number;          // 底价
+  title: string;           // 职位名称
+  organization: string;    // 机构名称
+  salary: string;         // 薪资范围
+  basePrice: string;      // 底价
   requirements: {
-    gender: number;     // 性别代码
-    education: number;  // 学历代码
-    ageMin?: number;
-    ageMax?: number;
-    certs?: number[];  // 证书要求
+    gender?: '男' | '女' | '男女不限';
+    education: string;
+    ageRange: string;    // 例如: "18-35岁"
   };
-  address: string[];     // 工作地点
-  quota: number;         // 名额
-  sum: number;          // 已报名人数
-  status: string;       // 职位状态
-  endTime: number;      // 截止时间
-  postTime: number;     // 发布时间
-  desc?: string;        // 职位描述
-  types: number[];      // 职位类型
-  welfare: string[];    // 福利待遇
-  posterId: string;     // 发布者ID
-  institutionId: number; // 机构ID
+  deadline?: string;     // 截止时间
+  status?: string;       // 例如: "名额候补中"
 }
 
 interface QueryResponse {
   readPosLst: JobPositionDTO[];
 }
 
-// const exampleJob: JobPositionDTO = {
-//   title: "高级前端工程师",
-//   organization: "字节跳动",
-//   salary: "25-35K",
-//   basePrice: "2000",
-//   requirements: {
-//     gender: "男女不限",
-//     education: "本科及以上",
-//     ageRange: "25-35岁"
-//   },
-//   deadline: "2024-02-01",
-//   status: "急聘"
-// };
-
+const exampleJobs: JobPositionDTO[] = [
+  {
+    title: "高级前端工程师",
+    organization: "字节跳动",
+    salary: "25-35K",
+    basePrice: "2000",
+    requirements: {
+      gender: "男女不限",
+      education: "本科及以上",
+      ageRange: "25-35岁"
+    },
+    deadline: "2024-02-01",
+    status: "急聘"
+  },
+  {
+    title: "资深后端工程师",
+    organization: "阿里巴巴",
+    salary: "30-45K",
+    basePrice: "2500",
+    requirements: {
+      gender: "男女不限",
+      education: "本科及以上",
+      ageRange: "25-40岁"
+    },
+    deadline: "2024-02-15",
+    status: "在招"
+  },
+  {
+    title: "产品经理",
+    organization: "腾讯",
+    salary: "20-35K",
+    basePrice: "1800",
+    requirements: {
+      gender: "男女不限",
+      education: "本科及以上",
+      ageRange: "24-35岁"
+    },
+    deadline: "2024-02-10",
+    status: "在招"
+  }
+];
 
 export default function Temp() {
-  return <PISearchBar />;
+  return (
+    <View style={{ flex: 1 }}>
+      <PISearchBar />
+      <StalinFlatList
+        style={{ flex: 1 }}
+        data={exampleJobs}
+        renderItem={({ item }) => <PositionItem {...item} />}
+      />
+    </View>
+  );
 }
+
+// 将所有样式统一放在文件底部
+const styles = StyleSheet.create({
+  // SearchBar styles
+  searchButton: {
+    flex: 1,
+  },
+  piSearchContainer: {
+    height: hp(64),
+    width: wp(600),
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginStart: wp(24),
+    paddingHorizontal: wp(16),
+    backgroundColor: WHITE,
+    borderRadius: wp(24),
+  },
+  searchContent: {
+    flex: 1,
+    marginStart: wp(8),
+    fontSize: fp(14),
+    flexShrink: 1,
+  },
+  searchBarWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: hp(8),
+  },
+  searchIconContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  chatIconContainer: {
+    padding: wp(12),
+    marginStart: wp(30),
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  // RecommendSection styles
+  recommendContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: hp(38),
+    paddingHorizontal: wp(24),
+  },
+  recommendText: {
+    fontWeight: '600',
+    fontSize: fp(16),
+  },
+  filterWrapper: {
+    flex: 1,
+    alignItems: 'flex-end',
+  },
+  filterContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  filterItem: {
+    width: wp(94),
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: LIGHT,
+    borderRadius: wp(10),
+    paddingVertical: hp(8),
+    paddingHorizontal: wp(12),
+    marginStart: wp(12),
+  },
+  filterText: {
+    fontSize: fp(12),
+  },
+  filterIcon: {
+    width: wp(8),
+    height: wp(8),
+    marginStart: wp(8),
+  },
+
+  // PISearchBar styles
+  backgroundImage: {
+    width: wp(750),
+  },
+  safeArea: {
+    width: '100%',
+  },
+  container: {
+    paddingTop: hp(8),
+    paddingHorizontal: wp(28),
+  },
+});
 
