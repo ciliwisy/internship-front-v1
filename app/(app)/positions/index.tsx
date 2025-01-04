@@ -1,11 +1,10 @@
 ////
-import { View, StyleSheet, Platform, TextInput, TouchableOpacity, Image } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Image, ImageBackground } from 'react-native';
 import { useQuery, gql } from '@apollo/client';
-import React, { useState, useCallback, useEffect } from 'react';
-import StalinFlatList from '@/components/FlatList';
+import React, { useState, useEffect } from 'react';
 import { wp, hp, fp } from '@/constants/Adapt';
 import { Ionicons } from '@expo/vector-icons';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { StalinText } from '@/components/Text';
 import { WHITE, GRAY, GRAY_LIGHT, LIGHT} from '@/constants/Colors';
@@ -61,88 +60,225 @@ const ReadPosLst = gql`
  * @description 首页上面的那个searchbar
 */
 
-function PISearchBar() {
-
-  const [mark, setMark] = useState<number | null>(null);
-  const [hasMore, setHasMore] = useState(true);
-  const [positions, setPositions] = useState<JobPositionDTO[]>([]);
-  const [error, setError] = useState<string | null>(null);
-  const [keyword, setKeyword] = useState('');
+// SearchBar 组件
+const SearchBar = () => {
   const router = useRouter();
-  const params = useLocalSearchParams<{ keyword?: string }>();
+
+  const styles = StyleSheet.create({
+    searchButton: {
+      flex: 1,
+    },
   
-  // 监听路由参数变化，当有关键词时执行搜索
+    piSearchContainer: {
+      height: hp(64),
+      width: wp(600),
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginStart: wp(24),
+      paddingHorizontal: wp(16),
+      backgroundColor: WHITE,
+      borderRadius: wp(24),
+    },
+  
+    searchContent: {
+      flex: 1,
+      marginStart: wp(8),
+      fontSize: fp(14),
+      flexShrink: 1,
+    },
+  
+    searchBarWrapper: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: hp(8),
+    },
+  
+    searchIconContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      flex: 1,
+    },
+  
+    chatIconContainer: {
+      padding: wp(12),
+      marginStart: wp(30),
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+  });
+  
+  return (
+    <View style={styles.searchBarWrapper}>
+      <TouchableOpacity 
+        style={styles.searchButton} 
+        onPress={() => router.push('/positions/search')}
+      >
+        <View style={styles.piSearchContainer}>
+          <View style={styles.searchIconContainer}>
+            <Ionicons 
+              name="search-outline" 
+              size={hp(40)}
+              color={GRAY}
+            />
+            <StalinText 
+              variant="T8" 
+              color={GRAY_LIGHT} 
+              style={[styles.searchContent, { flexShrink: 1 }]}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.5}
+            >
+              搜索职位/公司
+            </StalinText>
+          </View>
+        </View>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.chatIconContainer}>
+        <Ionicons 
+          name="chatbox-outline" 
+          size={hp(40)} 
+          color={GRAY}
+        />
+      </TouchableOpacity>
+    </View>
+  );
+};
+
+// RecommendSection 组件
+const RecommendSection = () => {
+
+  const styles = StyleSheet.create({
+    recommendContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginTop: hp(38),
+      paddingHorizontal: wp(24),
+    },
+  
+    recommendText: {
+      fontWeight: '600',
+      fontSize: fp(16),
+    },
+  
+    filterWrapper: {
+      flex: 1,
+      alignItems: 'flex-end',
+    },
+  
+    filterContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+  
+    filterItem: {
+      width:wp(94),
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: LIGHT,
+      borderRadius: wp(10),
+      paddingVertical: hp(8),
+      paddingHorizontal: wp(12),
+      marginStart: wp(12),
+    },
+  
+    filterText: {
+      fontSize: fp(12),
+    },
+  
+    filterIcon: {
+      width: wp(8),
+      height: wp(8),
+      marginStart: wp(8),
+    },
+  });
+
+  return (
+    <View style={styles.recommendContainer}>
+      <StalinText variant='T7' style={styles.recommendText}>
+        推荐
+      </StalinText>
+      <View style={styles.filterWrapper}>
+        <View style={styles.filterContainer}>
+          <View style={styles.filterItem}>
+            <StalinText variant='T9' style={styles.filterText}>
+              长春 
+            </StalinText>
+            <Image 
+              source={require('@/assets/images/展开选项.png')} 
+              style={styles.filterIcon}
+            />
+          </View>
+          <View style={styles.filterItem}>
+            <StalinText variant='T9' style={styles.filterText}>
+              筛选
+            </StalinText>
+            <Image 
+              source={require('@/assets/images/展开选项.png')} 
+              style={styles.filterIcon}
+            />
+          </View>
+        </View>
+      </View>
+    </View>
+  );
+};
+
+// 主组件
+function PISearchBar() {
+  const [mark, setMark] = useState<number | null>(null);
+  const [keyword, setKeyword] = useState('');
+  const params = useLocalSearchParams<{ keyword?: string }>();
+  const insets = useSafeAreaInsets();
+
   useEffect(() => {
     if (params.keyword) {
       setKeyword(params.keyword);
-      // handleRefresh(params.keyword);
     }
   }, [params.keyword]);
 
   const { loading, refetch } = useQuery<QueryResponse>(ReadPosLst, {
     variables: { action: "REFRESH", mark: null, keyword: keyword || undefined },
     onCompleted: (data) => {
-      setError(null);
       if (data?.readPosLst) {
-        setPositions(data.readPosLst);
         if (data.readPosLst.length > 0) {
           const lastItem = data.readPosLst[data.readPosLst.length - 1];
           setMark(lastItem.postTime);
         }
       }
-    },
-    onError: (error) => {
-      setError(error.message);
-      //setPositions([]);
     }
   });
 
+  const styles = StyleSheet.create({
+    backgroundImage: {
+      flex: 1,
+      width: wp(750),
+    },
+    
+    safeArea: {
+      flex: 1,
+    },
+  
+    container: {
+      flex: 1,
+      paddingTop: hp(8),
+      paddingHorizontal: wp(28),
+    },  
+  });
+
+
   return (
-    <View>
-      <View style={styles.searchBarWrapper}>
-        <TouchableOpacity onPress={() => router.push('/positions/search')}>
-          <View style={styles.piSearchContainer}>
-            <View style={styles.searchIconContainer}>
-              <Ionicons name="search-outline" size={wp(40)} color={GRAY}/>
-              <StalinText variant="T8" color={GRAY_LIGHT} style={styles.searchContent}>
-                搜索职位/公司
-              </StalinText>
-            </View>
-          </View>
-        </TouchableOpacity>
-        <View style={styles.chatIconContainer}>
-          <Ionicons name="chatbox-outline" size={wp(40)} color={GRAY}/>
+    <ImageBackground 
+      source={require('@/assets/images/bg1.png')}
+      style={[styles.backgroundImage, { height: hp(182) + insets.top }]}
+    >
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.container}>
+          <SearchBar />
+          <RecommendSection />
         </View>
-      </View>
-      
-      <View style={styles.recommendContainer}>
-        <StalinText variant='T7' style={styles.recommendText}>
-          推荐
-        </StalinText>
-        <View>
-          <View style={styles.filterContainer}>
-            <View style={styles.filterItem}>
-              <StalinText variant='T9'>
-                长春 
-              </StalinText>
-              <Image 
-                source={require('@/assets/images/展开选项.png')} 
-                style={{ width: wp(8), height: wp(8), marginStart: wp(12), marginTop: hp(15)}}
-              />
-            </View>
-            <View style={styles.filterItem}>
-              <StalinText variant='T9'>
-                筛选
-              </StalinText>
-              <Image 
-                source={require('@/assets/images/展开选项.png')} 
-                style={{ width: wp(8), height: wp(8), marginStart: wp(12), marginTop: hp(15)}}
-              />
-            </View>
-          </View>
-        </View>
-      </View>
-    </View>
+      </SafeAreaView>
+    </ImageBackground>
   );
 }
 
@@ -196,75 +332,6 @@ interface QueryResponse {
 
 
 export default function Temp() {
-  return <SafeAreaView>
-    <PISearchBar />
-  </SafeAreaView>
+  return <PISearchBar />;
 }
 
-const styles = StyleSheet.create({
-  piSearchContainer: {
-    width: wp(620),
-    height: wp(64),
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: hp(12),
-    marginStart: wp(28),
-    paddingStart: wp(14),
-    backgroundColor: WHITE,
-    borderRadius: wp(20),
-  },
-  searchContent: {
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
-  },
-  locationText: {
-    backgroundColor: WHITE, 
-    marginEnd: wp(70), 
-    width: wp(94), 
-    height: hp(50),
-    borderRadius: wp(20),
-    paddingStart: wp(16),
-    alignContent: 'center',
-  },
-  searchBarWrapper: {
-    flexDirection: 'row',
-    alignContent: 'center'
-  },
-  searchIconContainer: {
-    backgroundColor: WHITE,
-    flexDirection: 'row',
-    alignItems: 'center'
-  },
-  chatIconContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginStart: wp(30),
-    marginTop: hp(12)
-  },
-  recommendContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: hp(38)
-  },
-  recommendText: {
-    marginTop: hp(38),
-    marginStart: wp(36),
-    marginEnd: wp(328)
-  },
-  filterContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: hp(43)
-  },
-  filterItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: WHITE,///背景颜色重复 先用WHITE测试 改成LIGHT
-    borderRadius: wp(20),
-    width: wp(94),
-    height: hp(50),
-    marginEnd: wp(46),
-    paddingStart: wp(16)
-  }
-});

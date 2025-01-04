@@ -56,13 +56,14 @@ export const hp = (size: number): number => {
  * @returns number - 适配后的字体大小 (dp)
  */
 export const fp = (size: number): number => {
-  const scale = Math.min(screenWidth / DESIGN_WIDTH, screenHeight / DESIGN_HEIGHT);
-  const newSize = Math.round(size * scale);
   if (Platform.OS === "ios") {
-    return newSize;
-  } else {
-    return Math.round(newSize / pixelRatio);
+    return size;
   }
+  // Android 需要特殊处理
+  if (pixelRatio >= 3) {
+    return size * 0.9;
+  }
+  return size;
 };
 
 /**
