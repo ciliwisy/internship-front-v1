@@ -22,8 +22,8 @@
 import { Dimensions, PixelRatio, Platform } from "react-native";
 
 // 设计稿尺寸
-const DESIGN_WIDTH = 375;
-const DESIGN_HEIGHT = 812;
+const DESIGN_WIDTH = 750;
+const DESIGN_HEIGHT = 1624;
 
 // 获取屏幕尺寸
 const screenWidth = Dimensions.get("window").width;
