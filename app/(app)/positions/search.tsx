@@ -30,7 +30,7 @@ export default function SearchScreen() {
   useEffect(() => {
     loadHistory();
   }, []);
-
+//加载历史搜索
   const loadHistory = async () => {
     try {
       const saved = await AsyncStorage.getItem(HISTORY_KEY);
@@ -41,7 +41,7 @@ export default function SearchScreen() {
       console.error('Failed to load history:', e);
     }
   };
-
+//保存历史搜索
   const saveHistory = async (newKeyword: string) => {
     try {
       let newHistory = [newKeyword, ...history.filter(k => k !== newKeyword)];
@@ -54,7 +54,7 @@ export default function SearchScreen() {
       console.error('Failed to save history:', e);
     }
   };
-
+//搜索
   const handleSearch = (text: string) => {
     if (!text.trim()) return;
     saveHistory(text);
@@ -64,7 +64,7 @@ export default function SearchScreen() {
       params: { keyword: text }
     });
   };
-
+//清除历史搜索
   const clearHistory = async () => {
     try {
       await AsyncStorage.removeItem(HISTORY_KEY);
@@ -73,7 +73,7 @@ export default function SearchScreen() {
       console.error('Failed to clear history:', e);
     }
   };
-
+//渲染搜索标签
   const renderSearchTag = (text: string) => (
     <TouchableOpacity 
       key={text} 

@@ -51,10 +51,6 @@ const ReadPosLst = gql`
 }
 `;
 
-
-
-
-
 /**
  * @author mabohao
  * @time 2025-01-01 13:39
@@ -199,8 +195,6 @@ function PISearchBar() {
       if (data?.readPosLst) {
         if (data.readPosLst.length > 0) {
           const lastItem = data.readPosLst[data.readPosLst.length - 1];
-          // setMark(lastItem.postTime);
-          // setMark(lastItem.postTime);
         }
       }
     }
@@ -227,17 +221,7 @@ export interface JobPositionDTO {
   organization: string;    // 机构名称
   salary: string;         // 薪资范围
   basePrice: string;      // 底价
-  title: string;           // 职位名称
-  organization: string;    // 机构名称
-  salary: string;         // 薪资范围
-  basePrice: string;      // 底价
   requirements: {
-    gender?: '男' | '女' | '男女不限';
-    education: string;
-    ageRange: string;    // 例如: "18-35岁"
-  };
-  deadline?: string;     // 截止时间
-  status?: string;       // 例如: "名额候补中"
     gender?: '男' | '女' | '男女不限';
     education: string;
     ageRange: string;    // 例如: "18-35岁"
@@ -291,59 +275,8 @@ const exampleJobs: JobPositionDTO[] = [
     status: "在招"
   }
 ];
-const exampleJobs: JobPositionDTO[] = [
-  {
-    title: "高级前端工程师",
-    organization: "字节跳动",
-    salary: "25-35K",
-    basePrice: "2000",
-    requirements: {
-      gender: "男女不限",
-      education: "本科及以上",
-      ageRange: "25-35岁"
-    },
-    deadline: "2024-02-01",
-    status: "急聘"
-  },
-  {
-    title: "资深后端工程师",
-    organization: "阿里巴巴",
-    salary: "30-45K",
-    basePrice: "2500",
-    requirements: {
-      gender: "男女不限",
-      education: "本科及以上",
-      ageRange: "25-40岁"
-    },
-    deadline: "2024-02-15",
-    status: "在招"
-  },
-  {
-    title: "产品经理",
-    organization: "腾讯",
-    salary: "20-35K",
-    basePrice: "1800",
-    requirements: {
-      gender: "男女不限",
-      education: "本科及以上",
-      ageRange: "24-35岁"
-    },
-    deadline: "2024-02-10",
-    status: "在招"
-  }
-];
 
 export default function Temp() {
-  return (
-    <View style={{ flex: 1 }}>
-      <PISearchBar />
-      <StalinFlatList
-        style={{ flex: 1 }}
-        data={exampleJobs}
-        renderItem={({ item }) => <PositionItem {...item} />}
-      />
-    </View>
-  );
   return (
     <View style={{ flex: 1 }}>
       <PISearchBar />
